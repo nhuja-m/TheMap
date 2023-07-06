@@ -1,0 +1,25 @@
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0px;
+  width: 100vw;
+  height: 100vh;
+}
+
+.map-container {
+  height: 100%;
+}
+
+.map {
+  height: 100%;
+  z-index:1;
+}
+
+.message-form {
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
