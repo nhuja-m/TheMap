@@ -23,6 +23,7 @@ function App() {
     location: Location;
     haveUsersLocation: boolean
     userMessage: UserMessage;
+    messages: any[]
   }
 
   const [state, setState] = useState<State>({
@@ -35,7 +36,8 @@ function App() {
     userMessage : {
       name: '',
       message: ''
-    }
+    },
+    messages: []
   });
 
   const getUserLocation = () => {
@@ -76,6 +78,14 @@ function App() {
   };
 
   useEffect(() => {
+    fetch(API_URL)
+    .then(res => res.json())
+    .then(messages => {
+      setState(prevState => ({
+        ...prevState,
+        messages: messages
+      }))
+    })
     getUserLocation();
   }, []);
 
@@ -91,7 +101,7 @@ function App() {
     message: Joi.string().alphanum().min(1).max(100).required(),
   });
 
-  const API_URL = window.location.hostname == 'localhost' ? 'http://localhost:5000/api/v1/messages' : 'production-url-here'
+  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000/api/v1/messages' : 'production-url-here'
 
   const formisValid = () => {
     const userMessage = {
@@ -100,14 +110,14 @@ function App() {
     };
     const result = schema.validate(userMessage);
 
-    return result.error && !state.haveUsersLocation ? false : true;
+    return result.error || !state.haveUsersLocation ? false : true;
   }
 
   const formSubmitted = (event : React.FormEvent) => {
     event.preventDefault();
     console.log(state.userMessage);   
     if (formisValid()) {
-      fetch(API_URL, {
+      fetch("http://localhost:5000/api/v1/messages", {
         method: 'POST',
         headers: {
           'content-type':'application/json'
@@ -159,11 +169,16 @@ function App() {
 
         { state.haveUsersLocation ? 
           <Marker position={[state.location.lat, state.location.lng]} icon={myIcon}>
-          <Popup autoClose={false}>
-            A pretty CSS3 popup. <br /> Easily customizable.
-          </Popup>
         </Marker> : ''
-        }        
+        }  
+
+        {state.messages.map(message => (
+          <Marker key = {message._id} position={[message.latitude, message.longitude]} icon={myIcon}>
+          <Popup autoClose={false}>
+            <em>{message.name}:</em> {message.message}
+          </Popup>
+        </Marker>
+        ))}    
         <MapUpdater location={state.location} />
       </MapContainer>
 
